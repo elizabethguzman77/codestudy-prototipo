@@ -118,10 +118,26 @@ El repositorio incluye dos archivos HTML independientes, autocontenidos (HTML + 
 
 *Prototipo desarrollado con fines académicos como parte de la asignatura indicada en la carrera de Ingeniería en Ciberseguridad, UIDE.*
 
-## Evidencia visual de las interfaces:
+## Evidencia visual de las Interfaces
+## Interfaz en Celular:
 <img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/e5168ad5-f13c-4735-866f-372a89d90c52" />
 <img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/6c50e248-3536-4faf-ba38-f4d2c912668a" />
 <img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/72b8f22c-90b3-4969-9c72-28f8de0baa84" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/f7370683-7cf2-4009-8f93-8b9b3d6b286f" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/b50c2f85-8b3a-4752-9ce9-1591457a4565" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/da55fe01-816c-4e29-9c5d-2d80e602e480" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/4e1242af-ae1a-4f17-a0d9-2da47b485468" />
+
+## Interfaz en Computador:
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/ed12b82f-1f18-474f-b6d9-045df970efc9" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/1d00493d-303b-4081-ae03-92eac3d5f188" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/fe0fb842-be58-4d05-bff1-3d65c180d1c5" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/ab0ba205-c2b8-4fb1-a58c-3b1c68528e49" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/3608c0bc-409b-47f8-8dbe-9c4f69a6fd06" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/ad5f35da-f847-4660-bc97-08b70d24fd60" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/6e0713df-44b7-411d-8f30-fcf463f168dc" />
+
+
 
 
 
