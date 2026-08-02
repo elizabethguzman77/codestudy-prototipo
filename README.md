@@ -103,6 +103,7 @@ El repositorio incluye dos archivos HTML independientes, autocontenidos (HTML + 
 ## 10. Estructura del repositorio
 
 ```
+├── index.html
 ├── Interfaz celular.html
 ├── Interfaz computador.html
 └── README.md
