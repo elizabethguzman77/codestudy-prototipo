@@ -117,3 +117,11 @@ El repositorio incluye dos archivos HTML independientes, autocontenidos (HTML + 
 ---
 
 *Prototipo desarrollado con fines académicos como parte de la asignatura indicada en la carrera de Ingeniería en Ciberseguridad, UIDE.*
+
+## Evidencia visual de las interfaces:
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/e5168ad5-f13c-4735-866f-372a89d90c52" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/6c50e248-3536-4faf-ba38-f4d2c912668a" />
+<img width="2560" height="1600" alt="image" src="https://github.com/user-attachments/assets/72b8f22c-90b3-4969-9c72-28f8de0baa84" />
+
+
+
