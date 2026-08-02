@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CodeStudy — Prototipo de escritorio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   TOKENS
+   ========================================================= */
+:root{
+  --maroon:        #800020;
+  --maroon-dark:   #5c0017;
+  --maroon-deep:   #3a0011;
+  --gold:          #D4AF37;
+  --gold-dark:     #b8932a;
+  --maroon-soft:   #f4e6ea;
+  --gold-soft:     #faf3df;
+  --gray-light:    #F5F5F5;
+  --gray-100:      #f9f7f4;
+  --white:         #FFFFFF;
+  --ink:           #1C1C1C;
+  --ink-soft:      #6b6b6b;
+  --ink-faint:     #a3a3a3;
+  --border:        #e7e2dd;
+  --success:       #2E7D32;
+  --success-soft:  #e7f3e8;
+  --blocked:       #c7c2bc;
+  --code-bg:       #1e1b1f;
+  --code-ink:      #f1eee9;
+
+  --font-display:  'Poppins', sans-serif;
+  --font-body:     'Inter', sans-serif;
+  --font-mono:     'JetBrains Mono', 'SF Mono', Consolas, monospace;
+
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+  --shadow-card: 0 2px 10px rgba(28,28,28,0.06);
+  --shadow-pop:  0 18px 40px -14px rgba(28,28,28,0.28);
+  --sidebar-w: 248px;
+  --topbar-h: 68px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--font-body);
+  background:var(--gray-100);
+  color:var(--ink);
+  min-height:100vh;
+}
+h1,h2,h3{font-family:var(--font-display); margin:0;}
+p{margin:0;}
+button{font-family:var(--font-body); cursor:pointer;}
+input{font-family:var(--font-body);}
+a{text-decoration:none;}
+::selection{background:var(--gold); color:var(--maroon-deep);}
+:focus-visible{outline:2.5px solid var(--maroon); outline-offset:2px;}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+}
+svg.icon{width:19px; height:19px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex-shrink:0;}
+
+/* =========================================================
+   BARRA DE PROTOTIPO (navegación de demostración, no es parte del producto)
+   ========================================================= */
+.proto-bar{
+  position:sticky; top:0; z-index:100;
+  background:var(--ink); color:#cfc9c4;
+  font-size:11.5px;
+  display:flex; align-items:center; gap:14px;
+  padding:8px 22px;
+  flex-wrap:wrap;
+}
+.proto-bar .proto-label{
+  font-weight:600; letter-spacing:.04em; text-transform:uppercase; color:#8f8781;
+  flex-shrink:0; font-size:10px;
+}
+.proto-bar .proto-links{display:flex; gap:4px; flex-wrap:wrap;}
+.proto-bar button{
+  background:none; border:1px solid #3a3733; color:#cfc9c4;
+  padding:4px 11px; border-radius:99px; font-size:11px; font-weight:500;
+}
+.proto-bar button.active{background:var(--gold); border-color:var(--gold); color:var(--maroon-deep); font-weight:700;}
+.proto-bar button:hover:not(.active){border-color:#635c56;}
+
+/* =========================================================
+   VISTAS raíz
+   ========================================================= */
+.view{display:none;}
+.view.active{display:block;}
+
+/* =========================================================
+   LOGIN — pantalla partida
+   ========================================================= */
+#view-login.active{display:flex; min-height:calc(100vh - 37px);}
+.login-hero{
+  flex:0 0 42%;
+  background:
+    radial-gradient(circle at 20% 15%, rgba(212,175,55,0.18) 0%, transparent 45%),
+    linear-gradient(160deg, var(--maroon) 0%, var(--maroon-deep) 100%);
+  color:var(--white);
+  padding:56px 52px;
+  display:flex; flex-direction:column; justify-content:space-between;
+  position:relative; overflow:hidden;
+}
+.login-hero .brand{display:flex; align-items:center; gap:11px;}
+.login-hero .brand-mark{
+  width:38px; height:38px; border-radius:10px;
+  background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:700; font-size:16px; color:var(--gold);
+}
+.login-hero .brand-text{font-family:var(--font-display); font-weight:600; font-size:16px;}
+.login-hero .brand-text span{display:block; font-weight:400; font-size:11px; color:#e3c9d0;}
+.login-hero .hero-copy{max-width:380px;}
+.login-hero h1{font-size:32px; line-height:1.22; margin-bottom:14px;}
+.login-hero p.lede{font-size:14px; color:#e9d3d8; line-height:1.6;}
+.login-hero .hero-snippet{
+  font-family:var(--font-mono); font-size:12px; color:#e9d3d8;
+  background:rgba(0,0,0,0.22); border:1px solid rgba(255,255,255,0.12);
+  border-radius:12px; padding:16px 18px; margin-top:26px; line-height:1.7;
+}
+.login-hero .hero-snippet .k{color:#f2c9a0;} .login-hero .hero-snippet .s{color:#bfe0a8;} .login-hero .hero-snippet .c{color:#a99aa4;}
+.login-hero .hero-foot{display:flex; gap:26px; font-size:12px; color:#e9d3d8;}
+.login-hero .hero-foot b{display:block; font-family:var(--font-display); font-size:19px; color:var(--white);}
+
+.login-panel{
+  flex:1; display:flex; align-items:center; justify-content:center;
+  background:var(--white); padding:40px;
+}
+.login-box{width:100%; max-width:360px;}
+.login-welcome{margin-bottom:26px;}
+.login-welcome h2{font-size:21px; margin-bottom:5px;}
+.login-welcome p{color:var(--ink-soft); font-size:13.5px;}
+.login-forgot{display:block; text-align:right; font-size:12.5px; color:var(--maroon); font-weight:600; margin:-4px 0 18px;}
+.divider{display:flex; align-items:center; gap:10px; margin:20px 0; color:var(--ink-faint); font-size:12px;}
+.divider::before, .divider::after{content:""; flex:1; height:1px; background:var(--border);}
+.oauth-row{display:flex; gap:10px;}
+.oauth-btn{
+  flex:1; display:flex; align-items:center; justify-content:center; gap:9px;
+  border:1.5px solid var(--border); background:var(--white); border-radius:11px;
+  padding:11px; font-size:13px; font-weight:600; color:var(--ink);
+}
+.oauth-btn:hover{border-color:var(--ink-faint);}
+.login-footer{text-align:center; font-size:12.5px; color:var(--ink-soft); margin-top:20px;}
+.login-footer a{color:var(--maroon); font-weight:600;}
+
+/* =========================================================
+   CAMPOS / BOTONES compartidos
+   ========================================================= */
+.field{margin-bottom:15px;}
+.field label{font-size:12.5px; font-weight:600; color:var(--ink-soft); display:block; margin-bottom:6px;}
+.field-input{
+  width:100%; border:1.5px solid var(--border); border-radius:11px;
+  padding:12px 14px; font-size:14px; background:var(--white); color:var(--ink);
+}
+.field-input:focus{border-color:var(--maroon);}
+.field-pw{position:relative;}
+.field-pw .field-input{padding-right:42px;}
+.field-pw button{
+  position:absolute; right:10px; top:50%; transform:translateY(-50%);
+  background:none; border:none; color:var(--ink-faint); padding:4px;
+}
+.btn{
+  border-radius:12px; padding:12.5px 18px; font-weight:600; font-size:14px;
+  border:none; display:inline-flex; align-items:center; justify-content:center; gap:8px;
+  transition:transform .1s ease, opacity .15s ease, background .15s ease;
+}
+.btn:active{transform:scale(0.98);}
+.btn-primary{background:var(--maroon); color:var(--white);}
+.btn-primary:hover{background:var(--maroon-dark);}
+.btn-primary:disabled{opacity:.55; cursor:default;}
+.btn-secondary{background:var(--white); color:var(--maroon); border:1.5px solid var(--maroon);}
+.btn-secondary:hover{background:var(--maroon-soft);}
+.btn-block{width:100%;}
+.btn-ghost{background:transparent; color:var(--ink-soft); border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--ink-faint); color:var(--ink);}
+.btn-sm{padding:8px 14px; font-size:12.5px; border-radius:10px;}
+
+/* =========================================================
+   APP SHELL (sidebar + topbar + contenido)
+   ========================================================= */
+#view-app-shell.active{display:flex; min-height:calc(100vh - 37px);}
+
+.sidebar{
+  width:var(--sidebar-w); flex-shrink:0;
+  background:var(--white); border-right:1px solid var(--border);
+  display:flex; flex-direction:column;
+  position:sticky; top:37px; height:calc(100vh - 37px);
+}
+.sidebar-brand{
+  display:flex; align-items:center; gap:10px;
+  padding:22px 20px 18px;
+}
+.brand-mark{
+  width:34px; height:34px; border-radius:9px;
+  background:linear-gradient(155deg, var(--maroon), var(--maroon-dark));
+  display:flex; align-items:center; justify-content:center;
+  color:var(--gold); font-family:var(--font-display); font-weight:700; font-size:15px;
+  flex-shrink:0;
+}
+.sidebar-brand .brand-text{font-family:var(--font-display); font-weight:600; font-size:15px; line-height:1.2;}
+.sidebar-brand .brand-text span{display:block; font-weight:400; font-size:10.5px; color:var(--ink-soft);}
+
+.sidebar-nav{padding:6px 12px; display:flex; flex-direction:column; gap:2px;}
+.side-link{
+  display:flex; align-items:center; gap:11px;
+  padding:10px 12px; border-radius:11px; border:none; background:none;
+  font-size:13.5px; font-weight:500; color:var(--ink-soft); text-align:left; width:100%;
+}
+.side-link svg{width:18px; height:18px;}
+.side-link:hover{background:var(--gray-100); color:var(--ink);}
+.side-link.active{background:var(--maroon-soft); color:var(--maroon-dark); font-weight:600;}
+
+.sidebar-cta{margin:10px 12px 0;}
+
+.sidebar-spacer{flex:1;}
+
+/* --- riel de racha: elemento distintivo, visible en toda la app --- */
+.streak-rail{
+  margin:14px 14px 0; padding:14px;
+  background:linear-gradient(160deg, var(--maroon), var(--maroon-deep));
+  border-radius:var(--radius-md); color:var(--white);
+}
+.streak-rail .top{display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;}
+.streak-rail .top .n{font-family:var(--font-display); font-weight:700; font-size:19px; display:flex; align-items:baseline; gap:4px;}
+.streak-rail .top .n small{font-size:10.5px; font-weight:500; color:#e9d3d8;}
+.streak-rail .flame{width:20px; height:20px; color:var(--gold);}
+.rail-days{display:flex; gap:3px;}
+.rail-cell{flex:1; height:16px; border-radius:4px; background:rgba(255,255,255,0.14);}
+.rail-cell.on{background:var(--gold);}
+.streak-rail .hint{font-size:10.5px; color:#e9d3d8; margin-top:9px; line-height:1.5;}
+
+.sidebar-user{
+  display:flex; align-items:center; gap:10px;
+  padding:16px 20px; border-top:1px solid var(--border); margin-top:14px;
+}
+.sidebar-user .mini-avatar{
+  width:34px; height:34px; border-radius:50%;
+  background:linear-gradient(155deg, var(--gold), var(--gold-dark));
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--maroon-deep);
+  flex-shrink:0;
+}
+.sidebar-user .name{font-size:12.5px; font-weight:600;}
+.sidebar-user .role{font-size:11px; color:var(--ink-soft);}
+.sidebar-user button{margin-left:auto; background:none; border:none; color:var(--ink-faint);}
+
+.app-main{flex:1; min-width:0; display:flex; flex-direction:column;}
+.app-topbar{
+  height:var(--topbar-h); flex-shrink:0;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 32px; border-bottom:1px solid var(--border);
+  background:rgba(249,247,244,0.85); backdrop-filter:blur(8px);
+  position:sticky; top:37px; z-index:10;
+}
+.topbar-title h1{font-size:18px;}
+.topbar-title p{font-size:12px; color:var(--ink-soft); margin-top:1px;}
+.topbar-actions{display:flex; align-items:center; gap:12px;}
+.topbar-search{
+  display:flex; align-items:center; gap:8px; background:var(--white);
+  border:1.5px solid var(--border); border-radius:11px; padding:8px 13px; width:230px;
+}
+.topbar-search input{border:none; outline:none; font-size:13px; flex:1; background:none;}
+.topbar-search svg{color:var(--ink-faint); width:16px; height:16px;}
+.icon-btn{
+  width:38px; height:38px; border-radius:50%; flex-shrink:0;
+  background:var(--white); border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center; color:var(--ink);
+}
+.icon-btn:hover{border-color:var(--ink-faint);}
+.topbar-avatar{
+  width:36px; height:36px; border-radius:50%;
+  background:linear-gradient(155deg, var(--gold), var(--gold-dark));
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:700; font-size:13px; color:var(--maroon-deep);
+}
+
+.app-content{padding:28px 32px 60px; max-width:1280px;}
+
+.panel{display:none;}
+.panel.active{display:block;}
+
+/* =========================================================
+   Utilidades de layout
+   ========================================================= */
+.grid-2{display:grid; grid-template-columns:2fr 1fr; gap:22px;}
+.grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:16px;}
+.grid-cols-2{display:grid; grid-template-columns:1fr 1fr; gap:14px 24px;}
+.section-title{font-size:14.5px; font-weight:600; margin:0 0 12px; display:flex; justify-content:space-between; align-items:center;}
+.section-title a{font-size:12px; color:var(--maroon); font-weight:600;}
+.card{background:var(--white); border-radius:var(--radius-md); padding:18px; box-shadow:var(--shadow-card); border:1px solid var(--border);}
+.badge{display:inline-block; font-size:10.5px; font-weight:600; padding:3px 9px; border-radius:99px; letter-spacing:.02em;}
+.badge-basic{background:var(--success-soft); color:var(--success);}
+.badge-inter{background:var(--gold-soft); color:#8a6d1c;}
+.badge-review{background:var(--maroon-soft); color:var(--maroon-dark);}
+.progress-track{height:7px; background:var(--gray-light); border-radius:99px; overflow:hidden; border:1px solid var(--border);}
+.progress-fill{height:100%; background:linear-gradient(90deg, var(--maroon), var(--maroon-dark)); border-radius:99px;}
+.progress-fill.gold{background:linear-gradient(90deg, var(--gold), var(--gold-dark));}
+
+/* =========================================================
+   HOME
+   ========================================================= */
+.stat-bar{display:flex; gap:14px; margin-bottom:22px;}
+.stat-mini{flex:1; background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px; display:flex; align-items:center; justify-content:space-between;}
+.stat-mini .n{font-family:var(--font-display); font-size:22px; font-weight:700; color:var(--maroon);}
+.stat-mini .l{font-size:11px; color:var(--ink-soft); text-align:right; line-height:1.4;}
+
+.resume-card{
+  background:linear-gradient(135deg, var(--maroon), var(--maroon-dark));
+  border-radius:var(--radius-lg); padding:26px 28px; color:var(--white);
+  display:flex; align-items:center; justify-content:space-between; gap:20px; margin-bottom:24px;
+}
+.resume-card .eyebrow{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:#e9c9d0; margin-bottom:8px;}
+.resume-card h2{font-size:21px; margin-bottom:6px;}
+.resume-card p{font-size:12.5px; color:#e9d3d8;}
+.resume-card .btn-primary{background:var(--gold); color:var(--maroon-deep); flex-shrink:0;}
+.resume-card .btn-primary:hover{background:#e3c25c;}
+
+.course-card{
+  background:var(--white); border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:16px; display:flex; gap:13px; align-items:center; margin-bottom:11px;
+  width:100%; text-align:left;
+}
+.course-card:hover{border-color:var(--ink-faint);}
+.course-icon{
+  width:44px; height:44px; border-radius:11px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; color:var(--white);
+}
+.course-body{flex:1; min-width:0;}
+.course-body .name{font-size:13.5px; font-weight:600; margin-bottom:7px;}
+.course-body .prog-row{display:flex; align-items:center; gap:8px;}
+.course-body .prog-row span{font-size:11px; color:var(--ink-soft); font-weight:600; flex-shrink:0;}
+
+.feed-item{display:flex; gap:11px; padding:11px 0; border-top:1px solid var(--border);}
+.feed-item:first-child{border-top:none; padding-top:2px;}
+.feed-dot{width:8px; height:8px; border-radius:50%; background:var(--gold); margin-top:5px; flex-shrink:0;}
+.feed-item .t{font-size:12.5px; line-height:1.5;}
+.feed-item .time{font-size:11px; color:var(--ink-faint); margin-top:2px;}
+
+/* =========================================================
+   CURSOS / RETOS — dos paneles
+   ========================================================= */
+.search-bar{
+  display:flex; align-items:center; gap:8px; background:var(--white);
+  border:1.5px solid var(--border); border-radius:11px; padding:11px 14px; margin-bottom:16px; max-width:420px;
+}
+.search-bar input{border:none; outline:none; font-size:13.5px; flex:1; background:none;}
+.search-bar svg{color:var(--ink-faint); flex-shrink:0;}
+.chip-row{display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap;}
+.chip{padding:8px 15px; border-radius:99px; font-size:12.5px; font-weight:600; background:var(--white); border:1px solid var(--border); color:var(--ink-soft);}
+.chip.active{background:var(--maroon); color:var(--white); border-color:var(--maroon);}
+.chip:hover:not(.active){border-color:var(--ink-faint);}
+
+.cursos-layout{display:grid; grid-template-columns:300px 1fr; gap:22px; align-items:start;}
+.course-pick{
+  width:100%; text-align:left; display:flex; gap:12px; align-items:center;
+  background:var(--white); border:1.5px solid var(--border); border-radius:var(--radius-sm);
+  padding:14px; margin-bottom:10px;
+}
+.course-pick.selected{border-color:var(--maroon); background:var(--maroon-soft);}
+.course-pick .name{font-size:13px; font-weight:600; margin-bottom:6px;}
+
+.course-detail-head{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+.course-detail-head h2{font-size:18px;}
+.course-detail-head span{font-size:13px; font-weight:700; color:var(--maroon);}
+.course-detail-desc{font-size:12.5px; color:var(--ink-soft); margin:8px 0 18px; line-height:1.6;}
+
+.challenge-item{
+  display:flex; align-items:center; gap:14px; background:var(--white);
+  border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 16px;
+  margin-bottom:9px; width:100%; text-align:left;
+}
+.challenge-item:hover:not(:disabled){border-color:var(--ink-faint);}
+.challenge-item:disabled{opacity:.55;}
+.challenge-num{
+  width:32px; height:32px; border-radius:9px; background:var(--gray-light);
+  display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700;
+  color:var(--ink-soft); flex-shrink:0;
+}
+.challenge-item.done .challenge-num{background:var(--success-soft); color:var(--success);}
+.challenge-item.current .challenge-num{background:var(--maroon); color:var(--white);}
+.challenge-body{flex:1; min-width:0;}
+.challenge-body .t{font-size:13.5px; font-weight:600; margin-bottom:3px;}
+.challenge-body .m{font-size:11.5px; color:var(--ink-soft);}
+.challenge-status{flex-shrink:0;}
+.challenge-status svg{width:19px; height:19px; color:var(--success);}
+.challenge-status.lock svg{color:var(--blocked);}
+.challenge-status .go{font-size:12.5px; font-weight:700; color:var(--maroon);}
+
+/* =========================================================
+   EDITOR — dos paneles
+   ========================================================= */
+.editor-layout{display:grid; grid-template-columns:1fr 1.35fr; gap:24px; align-items:start;}
+.editor-title-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+.editor-title-row h2{font-size:17px;}
+.editor-desc{font-size:13px; color:var(--ink-soft); line-height:1.65; margin-bottom:18px;}
+.editor-block-title{font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-soft); margin:18px 0 8px;}
+.hint-box{background:var(--gold-soft); border:1px solid #eddca0; border-radius:12px; padding:13px 15px; font-size:12.5px; color:#7a611c; line-height:1.6;}
+
+.code-block{
+  background:var(--code-bg); border-radius:var(--radius-md); padding:14px 0;
+  font-family:var(--font-mono); font-size:12.5px; color:var(--code-ink);
+  margin-bottom:18px; overflow-x:auto;
+}
+.code-block .fname{
+  font-family:var(--font-body); font-size:11px; color:#a89bab; padding:0 18px 10px;
+  border-bottom:1px solid #34303a; margin-bottom:8px;
+}
+.code-line{display:flex; padding:2px 18px; white-space:pre;}
+.code-line .ln{width:22px; color:#615a68; flex-shrink:0; user-select:none;}
+.tok-kw{color:#e08fb0;} .tok-fn{color:#8fc7e0;} .tok-str{color:#c9e08f;} .tok-num{color:#e0c58f;} .tok-cm{color:#7a7382;}
+
+table.cases{width:100%; border-collapse:collapse; font-size:12.5px; margin-bottom:20px;}
+table.cases th{text-align:left; font-size:10.5px; text-transform:uppercase; letter-spacing:.03em; color:var(--ink-soft); padding:0 10px 8px; font-weight:600;}
+table.cases td{background:var(--white); padding:11px 10px; border-top:1px solid var(--border);}
+table.cases tr:first-of-type td{border-top:none;}
+table.cases td:first-child{border-radius:10px 0 0 10px;}
+table.cases td:last-child{border-radius:0 10px 10px 0; text-align:center;}
+table.cases svg{width:16px; height:16px; color:var(--success);}
+.btn-row{display:flex; gap:10px;}
+.console-box{
+  background:var(--ink); color:#9d968f; font-family:var(--font-mono); font-size:12px;
+  border-radius:var(--radius-sm); padding:14px 16px; margin-top:16px; min-height:64px; line-height:1.6;
+}
+.console-box .ok{color:#8fd08f;}
+
+/* =========================================================
+   REVISIÓN ENTRE PARES — panel dividido (código + hilo)
+   ========================================================= */
+.review-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:18px;}
+.review-head h2{font-size:17px;}
+.review-layout{display:grid; grid-template-columns:1.4fr 1fr; gap:24px; align-items:start;}
+.review-thread-card{background:var(--white); border:1px solid var(--border); border-radius:var(--radius-md); padding:18px;}
+.comment{display:flex; gap:10px; margin-bottom:18px;}
+.comment:last-of-type{margin-bottom:0;}
+.avatar{
+  width:32px; height:32px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:700; font-size:12px; color:var(--white);
+}
+.comment-body{flex:1;}
+.comment-body .row1{display:flex; align-items:baseline; gap:7px; margin-bottom:3px;}
+.comment-body .name{font-size:12.5px; font-weight:700;}
+.comment-body .time{font-size:11px; color:var(--ink-faint);}
+.comment-body .txt{font-size:12.5px; color:var(--ink); line-height:1.55; margin-bottom:5px;}
+.comment-body .reply{font-size:11.5px; font-weight:700; color:var(--maroon); background:none; border:none; padding:0;}
+.comment-input{display:flex; gap:8px; margin-top:16px; padding-top:16px; border-top:1px solid var(--border);}
+.comment-input input{flex:1; border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:12.5px;}
+
+/* =========================================================
+   PROGRESO
+   ========================================================= */
+.progreso-grid{display:grid; grid-template-columns:1.6fr 1fr; gap:20px; margin-bottom:20px;}
+.heat-wrap{overflow-x:auto; padding-bottom:4px;}
+.heat-months{display:flex; font-size:10.5px; color:var(--ink-soft); margin-bottom:6px; padding-left:24px; gap:24px;}
+.heat-grid{display:flex; gap:4px;}
+.heat-days{display:flex; flex-direction:column; gap:4px; font-size:9.5px; color:var(--ink-faint); justify-content:space-between; padding-right:4px;}
+.heat-days span{height:13px; display:flex; align-items:center;}
+.heat-col{display:flex; flex-direction:column; gap:4px;}
+.heat-cell{width:13px; height:13px; border-radius:3px; background:var(--gray-light);}
+.heat-legend{display:flex; align-items:center; gap:5px; font-size:10px; color:var(--ink-faint); margin-top:14px;}
+.heat-legend .heat-cell{width:9px; height:9px;}
+
+.streak-long{display:flex; flex-direction:column; justify-content:space-between; height:100%; gap:16px;}
+.streak-long .n{font-family:var(--font-display); font-size:30px; font-weight:700;}
+
+.mastery-row{display:flex; align-items:center; gap:12px; margin-bottom:14px;}
+.mastery-row .m-label{width:110px; font-size:12.5px; font-weight:600; flex-shrink:0;}
+.mastery-row .progress-track{flex:1;}
+.mastery-row .m-pct{width:34px; text-align:right; font-size:11.5px; font-weight:700; color:var(--ink-soft); flex-shrink:0;}
+.mastery-cols{display:grid; grid-template-columns:1fr 1fr; gap:6px 32px;}
+.mastery-cols .mastery-row:last-child, .mastery-cols .mastery-row:nth-last-child(2){margin-bottom:0;}
+
+/* =========================================================
+   PERFIL
+   ========================================================= */
+.profile-hero{
+  background:linear-gradient(135deg, var(--maroon), var(--maroon-deep));
+  border-radius:var(--radius-lg); padding:32px 32px 0; color:var(--white);
+  display:flex; align-items:flex-end; justify-content:space-between; gap:20px;
+  margin-bottom:44px;
+}
+.profile-hero-left{display:flex; align-items:center; gap:18px; padding-bottom:26px;}
+.profile-avatar{
+  width:84px; height:84px; border-radius:50%; margin-bottom:-46px; flex-shrink:0;
+  background:linear-gradient(155deg, var(--gold), var(--gold-dark));
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-display); font-weight:700; font-size:28px; color:var(--maroon-deep);
+  border:4px solid var(--white); box-shadow:var(--shadow-card);
+  position:relative; top:46px;
+}
+.profile-hero h2{font-size:19px;}
+.profile-hero .handle{font-size:12.5px; color:#e9d3d8; margin-top:2px;}
+.profile-hero .meta{font-size:11px; color:#dcb9c0; margin-top:6px;}
+.profile-stats{display:flex; gap:26px; padding-bottom:26px;}
+.profile-stats .stat{text-align:right;}
+.profile-stats .n{font-family:var(--font-display); font-size:20px; font-weight:700; color:var(--gold);}
+.profile-stats .l{font-size:10.5px; color:#e9d3d8;}
+
+.achievement-card{background:var(--white); border:1px solid var(--border); border-radius:var(--radius-sm); padding:16px; display:flex; align-items:center; gap:13px;}
+.achievement-icon{
+  width:42px; height:42px; border-radius:11px; flex-shrink:0;
+  background:var(--gold-soft); color:#8a6d1c;
+  display:flex; align-items:center; justify-content:center;
+}
+.achievement-card .t{font-size:13.5px; font-weight:600;}
+.achievement-card .d{font-size:11.5px; color:var(--ink-soft); margin-top:2px;}
+
+/* =========================================================
+   TOAST
+   ========================================================= */
+.toast{
+  position:fixed; right:28px; bottom:26px; z-index:200;
+  background:var(--ink); color:var(--white); padding:14px 18px;
+  border-radius:12px; font-size:13px; font-weight:500;
+  display:flex; align-items:center; gap:10px; max-width:340px;
+  box-shadow:0 16px 32px rgba(0,0,0,0.28);
+  transform:translateY(16px); opacity:0; pointer-events:none;
+  transition:all .25s ease;
+}
+.toast.show{transform:translateY(0); opacity:1;}
+.toast svg{width:18px; height:18px; stroke:var(--gold); flex-shrink:0;}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width:1140px){
+  .grid-2{grid-template-columns:1fr;}
+  .cursos-layout{grid-template-columns:1fr;}
+  .editor-layout{grid-template-columns:1fr;}
+  .review-layout{grid-template-columns:1fr;}
+  .progreso-grid{grid-template-columns:1fr;}
+}
+@media (max-width:860px){
+  #view-login.active{flex-direction:column;}
+  .login-hero{flex:none; padding:36px 28px;}
+  .sidebar{width:76px;}
+  .sidebar-brand .brand-text, .side-link span.label, .sidebar-user .name, .sidebar-user .role, .streak-rail .hint{display:none;}
+  .side-link{justify-content:center;}
+  .sidebar-cta{display:none;}
+  .app-content{padding:22px 18px 60px;}
+  .stat-bar, .grid-3{flex-wrap:wrap;}
+  .grid-3{grid-template-columns:1fr 1fr;}
+  .mastery-cols{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="proto-bar">
+  <span class="proto-label">Prototipo — saltar a pantalla</span>
+  <div class="proto-links" id="proto-links">
+    <button data-view="login" class="active">Login</button>
+    <button data-view="home">Inicio</button>
+    <button data-view="cursos">Cursos y retos</button>
+    <button data-view="editor">Editor</button>
+    <button data-view="revision">Revisión</button>
+    <button data-view="progreso">Progreso</button>
+    <button data-view="perfil">Perfil</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     LOGIN
+     ============================================================ -->
+<section class="view active" id="view-login">
+  <div class="login-hero">
+    <div>
+      <div class="brand">
+        <div class="brand-mark">U</div>
+        <div class="brand-text">CodeStudy<span>UIDE · Ingeniería de Software</span></div>
+      </div>
+      <div class="hero-copy" style="margin-top:64px;">
+        <h1>Aprende a programar practicando, no memorizando.</h1>
+        <p class="lede">Retos semanales por asignatura, revisión entre compañeros y un historial que muestra tu propio avance, hoja a hoja.</p>
+        <div class="hero-snippet">
+<span class="tok-kw" style="color:#e08fb0">if</span> constancia > novedad_inicial:<br>
+&nbsp;&nbsp;<span class="tok-fn" style="color:#8fc7e0">print</span>(<span class="s">"sigues avanzando"</span>)<br>
+<span class="tok-kw" style="color:#e08fb0">else</span>:<br>
+&nbsp;&nbsp;<span class="c" style="color:#a99aa4"># CodeStudy sostiene la racha</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-foot">
+      <div><b>+120</b>retos activos</div>
+      <div><b>3</b>asignaturas</div>
+      <div><b>1,250</b>CodePoints promedio</div>
+    </div>
+  </div>
+  <div class="login-panel">
+    <div class="login-box">
+      <div class="login-welcome">
+        <h2>Bienvenido de vuelta 👋</h2>
+        <p>Inicia sesión para continuar aprendiendo</p>
+      </div>
+      <form id="login-form">
+        <div class="field">
+          <label>Correo electrónico</label>
+          <input class="field-input" type="email" placeholder="ejemplo@uide.edu.ec" required>
+        </div>
+        <div class="field">
+          <label>Contraseña</label>
+          <div class="field-pw">
+            <input class="field-input" id="pw-input" type="password" placeholder="••••••••••" required>
+            <button type="button" onclick="togglePw()" aria-label="Mostrar contraseña">
+              <svg class="icon" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <a class="login-forgot" href="#">¿Olvidaste tu contraseña?</a>
+        <button type="submit" class="btn btn-primary btn-block">Iniciar sesión</button>
+      </form>
+      <div class="divider">o continúa con</div>
+      <div class="oauth-row">
+        <button class="oauth-btn" onclick="enterApp('home')">
+          <svg width="16" height="16" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.25 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.85A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.05H2.18a11 11 0 0 0 0 9.9l3.66-2.85z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1a11 11 0 0 0-9.82 6.05l3.66 2.85C6.71 7.3 9.14 5.38 12 5.38z"/></svg>
+          Google
+        </button>
+        <button class="oauth-btn" onclick="enterApp('home')">
+          <svg class="icon" width="16" height="16" viewBox="0 0 24 24" style="stroke:var(--maroon)"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+          UIDE ID
+        </button>
+      </div>
+      <p class="login-footer">¿No tienes cuenta? <a href="#">Regístrate</a></p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     APP SHELL (Inicio, Cursos, Editor, Revisión, Progreso, Perfil)
+     ============================================================ -->
+<div class="view" id="view-app-shell">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-mark">U</div>
+      <div class="brand-text">CodeStudy<span>Aprende. Practica. Crece.</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <button class="side-link" data-panel="home" onclick="showPanel('home')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1v-9"/></svg>
+        <span class="label">Inicio</span>
+      </button>
+      <button class="side-link" data-panel="cursos" onclick="showPanel('cursos')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>
+        <span class="label">Cursos y retos</span>
+      </button>
+      <button class="side-link" data-panel="revision" onclick="showPanel('revision')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="label">Revisión de pares</span>
+      </button>
+      <button class="side-link" data-panel="progreso" onclick="showPanel('progreso')">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="4" y1="20" x2="4" y2="13"/><line x1="10" y1="20" x2="10" y2="6"/><line x1="16" y1="20" x2="16" y2="15"/><line x1="21" y1="20" x2="21" y2="9"/></svg>
+        <span class="label">Progreso</span>
+      </button>
+      <button class="side-link" data-panel="perfil" onclick="showPanel('perfil')">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></svg>
+        <span class="label">Perfil</span>
+      </button>
+    </nav>
+    <div class="sidebar-cta">
+      <button class="btn btn-primary btn-block btn-sm" onclick="showPanel('cursos')">+ Nuevo reto</button>
+    </div>
+    <div class="sidebar-spacer"></div>
+    <div class="streak-rail">
+      <div class="top">
+        <div class="n">10 <small>días de racha</small></div>
+        <svg class="icon flame" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c.3 2.6-3.8 4.4-4.6 8.2-.6 2.8.8 5 2.8 6-.8-1.6-.6-3 .4-4.2.2 1.4 1 2.2 1.8 2.8 1.6-1 2.6-2.6 2.6-4.6 0-1-.3-1.8-.7-2.6 1 .4 1.7 1.2 2.1 2.2.5-1 .6-2.2.3-3.4C15.9 3.8 12.8 3 12 2z"/></svg>
+      </div>
+      <div class="rail-days" id="rail-days"></div>
+      <p class="hint">Cada reto queda en tu historial: repasar tu Progreso es tu propio repaso espaciado.</p>
+    </div>
+    <div class="sidebar-user">
+      <div class="mini-avatar">MG</div>
+      <div>
+        <div class="name">Mery Guzmán</div>
+        <div class="role">Estudiante</div>
+      </div>
+      <button onclick="showView('login')" aria-label="Cerrar sesión">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <div class="app-main">
+    <header class="app-topbar">
+      <div class="topbar-title">
+        <h1 id="topbar-h">Hola, Mery 👋</h1>
+        <p id="topbar-p">Vamos a seguir aprendiendo</p>
+      </div>
+      <div class="topbar-actions">
+        <div class="topbar-search" id="topbar-search" style="display:none;">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar cursos o retos...">
+        </div>
+        <button class="icon-btn" aria-label="Notificaciones"><svg class="icon" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 21a2 2 0 0 0 4 0"/></svg></button>
+        <div class="topbar-avatar">MG</div>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <!-- ============ INICIO ============ -->
+      <section class="panel active" id="panel-home">
+        <div class="stat-bar">
+          <div class="stat-mini"><div class="n">3</div><div class="l">Retos<br>completados hoy</div></div>
+          <div class="stat-mini"><div class="n">2.4h</div><div class="l">Tiempo<br>invertido hoy</div></div>
+          <div class="stat-mini"><div class="n">1,250</div><div class="l">Puntos<br>CodePoints</div></div>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <div class="resume-card">
+              <div>
+                <div class="eyebrow">Continúa donde quedaste</div>
+                <h2>Reto 03 · Condicionales</h2>
+                <p>Programación I · Básico · 100 pts</p>
+              </div>
+              <button class="btn btn-primary" onclick="showPanel('editor')">Continuar reto →</button>
+            </div>
+
+            <div class="section-title">Tus cursos <a href="#" onclick="showPanel('cursos');return false;">Ver todos</a></div>
+            <button class="course-card" onclick="showPanel('cursos')">
+              <div class="course-icon" style="background:var(--maroon)"><svg class="icon" style="stroke:white" viewBox="0 0 24 24"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg></div>
+              <div class="course-body"><div class="name">Programación I</div>
+                <div class="prog-row"><div class="progress-track" style="flex:1"><div class="progress-fill" style="width:66%"></div></div><span>66%</span></div>
+              </div>
+            </button>
+            <button class="course-card" onclick="showPanel('cursos')">
+              <div class="course-icon" style="background:var(--gold)"><svg class="icon" style="stroke:white" viewBox="0 0 24 24"><rect x="3" y="11" width="4" height="9"/><rect x="10" y="6" width="4" height="14"/><rect x="17" y="3" width="4" height="17"/></svg></div>
+              <div class="course-body"><div class="name">Estructuras de Datos</div>
+                <div class="prog-row"><div class="progress-track" style="flex:1"><div class="progress-fill gold" style="width:40%"></div></div><span>40%</span></div>
+              </div>
+            </button>
+            <button class="course-card" onclick="showPanel('cursos')">
+              <div class="course-icon" style="background:#4a4a4a"><svg class="icon" style="stroke:white" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+              <div class="course-body"><div class="name">Algoritmos</div>
+                <div class="prog-row"><div class="progress-track" style="flex:1"><div class="progress-fill" style="width:20%;background:#4a4a4a"></div></div><span>20%</span></div>
+              </div>
+            </button>
+          </div>
+
+          <div>
+            <div class="section-title" style="margin-top:0">Actividad reciente</div>
+            <div class="card">
+              <div class="feed-item"><div class="feed-dot"></div><div><div class="t">Ana C. aprobó tu solución de <b>Suma</b></div><div class="time">Hace 1h · +100 CodePoints</div></div></div>
+              <div class="feed-item"><div class="feed-dot"></div><div><div class="t">Completaste <b>Operadores y expresiones</b></div><div class="time">Ayer</div></div></div>
+              <div class="feed-item"><div class="feed-dot"></div><div><div class="t">Revisaste el código de <b>Luis G.</b></div><div class="time">Hace 2 días</div></div></div>
+              <div class="feed-item"><div class="feed-dot"></div><div><div class="t">Alcanzaste una racha de <b>7 días</b></div><div class="time">Hace 3 días</div></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ CURSOS / RETOS ============ -->
+      <section class="panel" id="panel-cursos">
+        <div class="search-bar">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Buscar cursos o retos...">
+        </div>
+        <div class="chip-row">
+          <button class="chip active">Todos</button>
+          <button class="chip">Programación</button>
+          <button class="chip">Estructuras</button>
+          <button class="chip">POO</button>
+        </div>
+
+        <div class="cursos-layout">
+          <div id="course-picker">
+            <!-- generado por JS -->
+          </div>
+          <div>
+            <div class="course-detail-head"><h2 id="cd-name">Programación I</h2><span id="cd-pct">65%</span></div>
+            <div class="progress-track" style="margin-bottom:8px;"><div class="progress-fill" id="cd-bar" style="width:65%"></div></div>
+            <p class="course-detail-desc" id="cd-desc">Fundamentos de programación: variables, condicionales, bucles y funciones en Python.</p>
+            <div id="challenge-list"><!-- generado por JS --></div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ EDITOR ============ -->
+      <section class="panel" id="panel-editor">
+        <div class="editor-title-row">
+          <h2>Reto 03: Condicionales</h2>
+          <span class="badge badge-basic">Básico · 100 pts</span>
+        </div>
+        <div class="editor-layout">
+          <div>
+            <p class="editor-desc">Escribe un programa que reciba un número entero y determine si es positivo, negativo o cero. Este reto refuerza el uso de <code>if</code> / <code>elif</code> / <code>else</code> visto en la clase de esta semana.</p>
+            <div class="editor-block-title">Pista</div>
+            <div class="hint-box">Recuerda evaluar primero el caso mayor a cero; el orden de las comparaciones evita chequeos innecesarios.</div>
+            <div class="editor-block-title">Casos de prueba</div>
+            <table class="cases" id="cases-table">
+              <tr><th>Entrada</th><th>Salida esperada</th><th>Estado</th></tr>
+              <tr><td>5</td><td>Positivo</td><td><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></td></tr>
+              <tr><td>-3</td><td>Negativo</td><td><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></td></tr>
+              <tr><td>0</td><td>Cero</td><td><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></td></tr>
+            </table>
+          </div>
+          <div>
+            <div class="code-block">
+              <div class="fname">main.py</div>
+              <div class="code-line"><span class="ln">1</span><span class="tok-fn">n</span> = <span class="tok-kw">int</span>(<span class="tok-fn">input</span>())</div>
+              <div class="code-line"><span class="ln">2</span></div>
+              <div class="code-line"><span class="ln">3</span><span class="tok-kw">if</span> n > <span class="tok-num">0</span>:</div>
+              <div class="code-line"><span class="ln">4</span>    <span class="tok-fn">print</span>(<span class="tok-str">"Positivo"</span>)</div>
+              <div class="code-line"><span class="ln">5</span><span class="tok-kw">elif</span> n &lt; <span class="tok-num">0</span>:</div>
+              <div class="code-line"><span class="ln">6</span>    <span class="tok-fn">print</span>(<span class="tok-str">"Negativo"</span>)</div>
+              <div class="code-line"><span class="ln">7</span><span class="tok-kw">else</span>:</div>
+              <div class="code-line"><span class="ln">8</span>    <span class="tok-fn">print</span>(<span class="tok-str">"Cero"</span>)</div>
+            </div>
+            <div class="btn-row">
+              <button class="btn btn-secondary" style="flex:1" onclick="runCode()" id="run-btn">Ejecutar</button>
+              <button class="btn btn-primary" style="flex:1" onclick="submitCode()">Enviar solución</button>
+            </div>
+            <div class="console-box" id="console-box">Ejecuta tu código para ver la salida aquí.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ REVISIÓN ENTRE PARES ============ -->
+      <section class="panel" id="panel-revision">
+        <div class="review-head">
+          <h2>Revisión de: Ana María C.</h2>
+          <span class="badge badge-review">En revisión</span>
+        </div>
+        <div class="review-layout">
+          <div class="code-block">
+            <div class="fname">suma.py</div>
+            <div class="code-line"><span class="ln">1</span><span class="tok-kw">def</span> <span class="tok-fn">suma</span>(a, b):</div>
+            <div class="code-line"><span class="ln">2</span>    total = a + b</div>
+            <div class="code-line"><span class="ln">3</span>    <span class="tok-kw">return</span> total</div>
+            <div class="code-line"><span class="ln">4</span></div>
+            <div class="code-line"><span class="ln">5</span><span class="tok-cm"># Prueba</span></div>
+            <div class="code-line"><span class="ln">6</span><span class="tok-fn">print</span>(suma(<span class="tok-num">2</span>, <span class="tok-num">3</span>))</div>
+          </div>
+          <div>
+            <div class="review-thread-card">
+              <div class="section-title" style="margin-top:0">Conversación</div>
+              <div class="comment">
+                <div class="avatar" style="background:var(--maroon)">AC</div>
+                <div class="comment-body">
+                  <div class="row1"><span class="name">Ana C.</span><span class="time">Hace 1h</span></div>
+                  <p class="txt">Buena solución 👍 ¿Validamos que los valores sean numéricos antes de sumar?</p>
+                  <button class="reply">Responder</button>
+                </div>
+              </div>
+              <div class="comment">
+                <div class="avatar" style="background:var(--gold); color:var(--maroon-deep)">LG</div>
+                <div class="comment-body">
+                  <div class="row1"><span class="name">Luis G.</span><span class="time">Hace 2h</span></div>
+                  <p class="txt">Buen punto, ya lo agregué ✅</p>
+                  <button class="reply">Responder</button>
+                </div>
+              </div>
+              <div class="comment-input">
+                <input type="text" placeholder="Escribe un comentario...">
+                <button class="btn btn-ghost btn-sm">Enviar</button>
+              </div>
+            </div>
+            <div class="btn-row" style="margin-top:14px">
+              <button class="btn btn-secondary" style="flex:1" onclick="showToast('revision-toast')">Solicitar cambios</button>
+              <button class="btn btn-primary" style="flex:1" onclick="approveReview()">Aprobar ✓</button>
+            </div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ PROGRESO ============ -->
+      <section class="panel" id="panel-progreso">
+        <div class="progreso-grid">
+          <div class="card">
+            <div class="section-title" style="margin-top:0">Actividad (últimos meses)</div>
+            <div class="heat-wrap">
+              <div class="heat-months" id="heat-months"></div>
+              <div style="display:flex; gap:4px;">
+                <div class="heat-days"><span>L</span><span>X</span><span>V</span></div>
+                <div class="heat-grid" id="heat-grid"></div>
+              </div>
+            </div>
+            <div class="heat-legend">Menos <div class="heat-cell" style="background:var(--gray-light)"></div><div class="heat-cell" style="background:#e8bcc8"></div><div class="heat-cell" style="background:#c15577"></div><div class="heat-cell" style="background:var(--maroon)"></div> Más</div>
+          </div>
+          <div class="card streak-long">
+            <div>
+              <div class="section-title" style="margin-top:0">Racha más larga</div>
+              <div class="n">12 🔥</div>
+              <div style="font-size:12px;color:var(--ink-soft)">días seguidos</div>
+            </div>
+            <svg width="100%" height="52" viewBox="0 0 200 52"><polyline points="0,42 33,34 66,37 100,20 133,26 166,8 200,13" fill="none" stroke="var(--gold)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+        </div>
+
+        <div class="section-title">Dominio por temas</div>
+        <div class="card">
+          <div class="mastery-cols">
+            <div>
+              <div class="mastery-row"><div class="m-label">Variables</div><div class="progress-track"><div class="progress-fill" style="width:80%"></div></div><div class="m-pct">80%</div></div>
+              <div class="mastery-row"><div class="m-label">Condicionales</div><div class="progress-track"><div class="progress-fill" style="width:70%"></div></div><div class="m-pct">70%</div></div>
+              <div class="mastery-row"><div class="m-label">Funciones</div><div class="progress-track"><div class="progress-fill" style="width:60%"></div></div><div class="m-pct">60%</div></div>
+            </div>
+            <div>
+              <div class="mastery-row"><div class="m-label">Estructuras</div><div class="progress-track"><div class="progress-fill" style="width:45%"></div></div><div class="m-pct">45%</div></div>
+              <div class="mastery-row"><div class="m-label">Bucles</div><div class="progress-track"><div class="progress-fill" style="width:40%"></div></div><div class="m-pct">40%</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PERFIL ============ -->
+      <section class="panel" id="panel-perfil">
+        <div class="profile-hero">
+          <div class="profile-hero-left">
+            <div class="profile-avatar">MG</div>
+            <div>
+              <h2>Mery Guzmán</h2>
+              <div class="handle">@merydev · Estudiante</div>
+              <div class="meta">Miembro desde Ene 2024</div>
+            </div>
+          </div>
+          <div class="profile-stats">
+            <div class="stat"><div class="n">24</div><div class="l">Retos completados</div></div>
+            <div class="stat"><div class="n">18.5</div><div class="l">Horas practicadas</div></div>
+            <div class="stat"><div class="n">1,250</div><div class="l">CodePoints</div></div>
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top:0">Logros</div>
+        <div class="grid-3">
+          <div class="achievement-card">
+            <div class="achievement-icon"><svg class="icon" style="width:19px;height:19px" viewBox="0 0 24 24"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="4"/></svg></div>
+            <div><div class="t">Primer reto</div><div class="d">Completa tu primer reto</div></div>
+          </div>
+          <div class="achievement-card">
+            <div class="achievement-icon"><svg class="icon" style="width:19px;height:19px" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 2c.3 2.6-3.8 4.4-4.6 8.2-.6 2.8.8 5 2.8 6-.8-1.6-.6-3 .4-4.2.2 1.4 1 2.2 1.8 2.8 1.6-1 2.6-2.6 2.6-4.6 0-1-.3-1.8-.7-2.6 1 .4 1.7 1.2 2.1 2.2.5-1 .6-2.2.3-3.4C15.9 3.8 12.8 3 12 2z"/></svg></div>
+            <div><div class="t">Constante</div><div class="d">7 días seguidos</div></div>
+          </div>
+          <div class="achievement-card">
+            <div class="achievement-icon"><svg class="icon" style="width:19px;height:19px" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div><div class="t">Colaborador</div><div class="d">10 revisiones realizadas</div></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="editor-toast"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>Solución enviada. Ana C. la revisará pronto.</span></div>
+<div class="toast" id="revision-toast"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>¡Aprobado! +100 CodePoints para Ana C.</span></div>
+
+<script>
+/* =========================================================
+   Navegación entre vistas / paneles
+   ========================================================= */
+var panelMeta = {
+  home:     ['Hola, Mery 👋', 'Vamos a seguir aprendiendo'],
+  cursos:   ['Cursos y retos', 'Explora tus asignaturas y continúa donde quedaste'],
+  editor:   ['Editor de código', 'Resuelve el reto y envíalo para revisión'],
+  revision: ['Revisión entre pares', 'Ayuda a un compañero a mejorar su solución'],
+  progreso: ['Tu progreso', 'Actividad, dominio por tema y racha de participación'],
+  perfil:   ['Perfil', 'Tu historial y logros en CodeStudy']
+};
+
+function showView(name){
+  if(name === 'login'){
+    document.getElementById('view-app-shell').classList.remove('active');
+    document.getElementById('view-login').classList.add('active');
+    syncProtoBar('login');
+  } else {
+    enterApp(name);
+  }
+}
+
+function enterApp(panel){
+  document.getElementById('view-login').classList.remove('active');
+  document.getElementById('view-app-shell').classList.add('active');
+  showPanel(panel || 'home');
+}
+
+function showPanel(panel){
+  document.querySelectorAll('.panel').forEach(function(p){ p.classList.remove('active'); });
+  var el = document.getElementById('panel-' + panel);
+  if(el) el.classList.add('active');
+  document.querySelectorAll('.side-link').forEach(function(l){ l.classList.toggle('active', l.dataset.panel === panel); });
+  var meta = panelMeta[panel];
+  if(meta){
+    document.getElementById('topbar-h').textContent = meta[0];
+    document.getElementById('topbar-p').textContent = meta[1];
+  }
+  document.getElementById('topbar-search').style.display = (panel === 'cursos') ? 'flex' : 'none';
+  syncProtoBar(panel);
+  var content = document.querySelector('.app-content');
+  if(content) content.scrollTop = 0;
+  window.scrollTo(0,0);
+}
+
+function syncProtoBar(name){
+  document.querySelectorAll('#proto-links button').forEach(function(b){
+    b.classList.toggle('active', b.dataset.view === name);
+  });
+}
+
+document.querySelectorAll('#proto-links button').forEach(function(b){
+  b.addEventListener('click', function(){ showView(b.dataset.view); });
+});
+
+document.getElementById('login-form').addEventListener('submit', function(e){
+  e.preventDefault();
+  enterApp('home');
+});
+
+function togglePw(){
+  var i = document.getElementById('pw-input');
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
+
+/* =========================================================
+   Cursos y retos — datos + render
+   ========================================================= */
+var courseData = {
+  prog1: {
+    name:'Programación I', pct:65, color:'var(--maroon)',
+    desc:'Fundamentos de programación: variables, condicionales, bucles y funciones en Python.',
+    challenges:[
+      {n:'01', t:'Variables y tipos de datos', m:'Básico · 100 pts', status:'done'},
+      {n:'02', t:'Operadores y expresiones', m:'Básico · 100 pts', status:'done'},
+      {n:'03', t:'Condicionales', m:'Básico · 100 pts', status:'current'},
+      {n:'04', t:'Bucles (for, while)', m:'Intermedio · 150 pts', status:'todo'},
+      {n:'05', t:'Funciones', m:'Intermedio · 150 pts', status:'locked'},
+      {n:'06', t:'Arreglos y listas', m:'Intermedio · 150 pts', status:'locked'}
+    ]
+  },
+  edd: {
+    name:'Estructuras de Datos', pct:40, color:'var(--gold)',
+    desc:'Pilas, colas, listas enlazadas y árboles: cómo organizar datos para resolver problemas reales.',
+    challenges:[
+      {n:'01', t:'Pilas (stack)', m:'Básico · 100 pts', status:'done'},
+      {n:'02', t:'Colas (queue)', m:'Básico · 100 pts', status:'current'},
+      {n:'03', t:'Listas enlazadas', m:'Intermedio · 150 pts', status:'todo'},
+      {n:'04', t:'Árboles binarios', m:'Avanzado · 200 pts', status:'locked'}
+    ]
+  },
+  algo: {
+    name:'Algoritmos', pct:20, color:'#4a4a4a',
+    desc:'Complejidad, búsqueda y ordenamiento: cómo comparar soluciones y elegir la más eficiente.',
+    challenges:[
+      {n:'01', t:'Notación Big O', m:'Básico · 100 pts', status:'current'},
+      {n:'02', t:'Búsqueda binaria', m:'Básico · 100 pts', status:'todo'},
+      {n:'03', t:'Ordenamiento burbuja', m:'Intermedio · 150 pts', status:'locked'}
+    ]
+  }
+};
+var selectedCourse = 'prog1';
+
+function renderCoursePicker(){
+  var wrap = document.getElementById('course-picker');
+  wrap.innerHTML = Object.keys(courseData).map(function(id){
+    var c = courseData[id];
+    var sel = id === selectedCourse ? ' selected' : '';
+    return '<button class="course-pick' + sel + '" onclick="selectCourse(\'' + id + '\')">' +
+      '<div class="course-icon" style="background:' + c.color + '; width:38px; height:38px; border-radius:10px; font-family:var(--font-display); font-weight:700; font-size:13px;">' + c.name.charAt(0) + '</div>' +
+      '<div style="flex:1; min-width:0;">' +
+        '<div class="name">' + c.name + '</div>' +
+        '<div class="prog-row"><div class="progress-track" style="flex:1"><div class="progress-fill" style="width:' + c.pct + '%"></div></div><span>' + c.pct + '%</span></div>' +
+      '</div>' +
+    '</button>';
+  }).join('');
+}
+
+function renderChallenges(id){
+  var c = courseData[id];
+  document.getElementById('cd-name').textContent = c.name;
+  document.getElementById('cd-pct').textContent = c.pct + '%';
+  document.getElementById('cd-bar').style.width = c.pct + '%';
+  document.getElementById('cd-desc').textContent = c.desc;
+
+  var html = c.challenges.map(function(ch){
+    if(ch.status === 'done'){
+      return '<button class="challenge-item done" disabled>' +
+        '<div class="challenge-num">' + ch.n + '</div>' +
+        '<div class="challenge-body"><div class="t">' + ch.t + '</div><div class="m">' + ch.m + '</div></div>' +
+        '<div class="challenge-status"><svg class="icon" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>' +
+      '</button>';
+    }
+    if(ch.status === 'current'){
+      return '<button class="challenge-item current" onclick="showPanel(\'editor\')">' +
+        '<div class="challenge-num">' + ch.n + '</div>' +
+        '<div class="challenge-body"><div class="t">' + ch.t + '</div><div class="m">' + ch.m + '</div></div>' +
+        '<div class="challenge-status"><span class="go">Continuar →</span></div>' +
+      '</button>';
+    }
+    if(ch.status === 'todo'){
+      return '<button class="challenge-item" onclick="showPanel(\'editor\')">' +
+        '<div class="challenge-num">' + ch.n + '</div>' +
+        '<div class="challenge-body"><div class="t">' + ch.t + '</div><div class="m">' + ch.m + '</div></div>' +
+        '<div class="challenge-status"><span class="go" style="color:var(--ink-soft)">Continuar →</span></div>' +
+      '</button>';
+    }
+    return '<button class="challenge-item" disabled>' +
+      '<div class="challenge-num">' + ch.n + '</div>' +
+      '<div class="challenge-body"><div class="t">' + ch.t + '</div><div class="m">' + ch.m + '</div></div>' +
+      '<div class="challenge-status lock"><svg class="icon" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>' +
+    '</button>';
+  }).join('');
+  document.getElementById('challenge-list').innerHTML = html;
+}
+
+function selectCourse(id){
+  selectedCourse = id;
+  renderCoursePicker();
+  renderChallenges(id);
+}
+
+/* =========================================================
+   Editor — ejecutar / enviar
+   ========================================================= */
+function runCode(){
+  var btn = document.getElementById('run-btn');
+  var box = document.getElementById('console-box');
+  var original = btn.textContent;
+  btn.textContent = 'Ejecutando…';
+  btn.disabled = true;
+  box.textContent = 'Ejecutando main.py…';
+  setTimeout(function(){
+    btn.textContent = original;
+    btn.disabled = false;
+    box.innerHTML = '<span class="ok">✓ 3 / 3 casos de prueba superados</span> — Positivo, Negativo, Cero';
+  }, 800);
+}
+
+function submitCode(){
+  showToast('editor-toast');
+  setTimeout(function(){ showView('revision'); }, 1100);
+}
+
+function approveReview(){
+  showToast('revision-toast');
+  setTimeout(function(){ showView('progreso'); }, 1100);
+}
+
+function showToast(id){
+  var t = document.getElementById(id);
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 2600);
+}
+
+/* =========================================================
+   Mapa de actividad (heatmap) y riel de racha — determinístico
+   ========================================================= */
+(function buildHeatmap(){
+  var grid = document.getElementById('heat-grid');
+  var months = document.getElementById('heat-months');
+  ['Mar','Abr','May','Jun','Jul','Ago'].forEach(function(m){
+    var s = document.createElement('span');
+    s.textContent = m;
+    months.appendChild(s);
+  });
+  var seed = [2,0,3,1,4,0,2, 1,3,0,2,4,1,0, 3,2,1,0,4,3,2, 1,0,2,3,1,4,0, 2,3,1,0,2,4,1, 0,2,3,4,1,0,2, 3,1,0,2,4,3,1, 2,0,1,3,4,2,0, 1,3,2,0,4,1,3];
+  var weeks = 24, days = 7;
+  var colors = ['#F5F5F5','#f2d3db','#e8bcc8','#c15577','#800020'];
+  for(var w = 0; w < weeks; w++){
+    var col = document.createElement('div');
+    col.className = 'heat-col';
+    for(var d = 0; d < days; d++){
+      var idx = (w * days + d) % seed.length;
+      var cell = document.createElement('div');
+      cell.className = 'heat-cell';
+      cell.style.background = colors[seed[idx]];
+      col.appendChild(cell);
+    }
+    grid.appendChild(col);
+  }
+})();
+
+(function buildRail(){
+  var rail = document.getElementById('rail-days');
+  var pattern = [0,1,0,1,1,1,1,1,1,1,1,1,1,1];
+  pattern.forEach(function(on){
+    var cell = document.createElement('div');
+    cell.className = 'rail-cell' + (on ? ' on' : '');
+    rail.appendChild(cell);
+  });
+})();
+
+renderCoursePicker();
+renderChallenges(selectedCourse);
+</script>
+</body>
+</html>
