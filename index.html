@@ -50,7 +50,17 @@
   .opt .ic svg{width:22px; height:22px; stroke:currentColor; fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round;}
   .opt .t{font-family:var(--font-display); font-weight:600; font-size:15px;}
   .opt .d{font-size:12px; color:var(--ink-soft); line-height:1.5;}
-  footer{margin-top:38px; font-size:11.5px; color:var(--ink-soft);}
+  .tip{
+    margin:26px 0 0; text-align:left; font-size:12.5px; color:var(--ink-soft); line-height:1.6;
+    background:var(--white); border:1px solid var(--border); border-radius:12px; padding:14px 16px;
+  }
+  .tip strong{color:var(--ink); font-weight:600;}
+  .doc-link{
+    display:inline-block; margin-top:16px; font-size:13px; font-weight:600;
+    color:var(--maroon); text-decoration:none;
+  }
+  .doc-link:hover{color:var(--maroon-dark); text-decoration:underline;}
+  footer{margin-top:34px; font-size:11.5px; color:var(--ink-soft); line-height:1.6;}
   @media (max-width:480px){ .options{grid-template-columns:1fr;} }
 </style>
 </head>
@@ -74,7 +84,9 @@
         <div class="d">Interfaz móvil dentro de un marco de dispositivo</div>
       </a>
     </div>
-    <footer>Universidad Internacional del Ecuador (UIDE) · Mery Elizabeth Guzmán Ontaneda</footer>
+    <p class="tip">💡 Dentro de cada prototipo, usa la barra superior <strong>"Prototipo — saltar a pantalla"</strong> para moverte directo entre las 7 pantallas del flujo, sin tener que navegar paso a paso.</p>
+    <a class="doc-link" href="https://github.com/elizabethguzman77/codestudy-prototipo#readme">Ver documentación completa del proyecto →</a>
+    <footer>Universidad Internacional del Ecuador (UIDE) · Mery Elizabeth Guzmán Ontaneda<br>Ingenería y Pensamiento Humano · 9 de agosto del 2026</footer>
   </div>
 </body>
 </html>
